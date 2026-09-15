@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Untuk Kamu — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE3D0;
+    --card:#F7F1E4;
+    --ink:#2B2420;
+    --ink-soft:#6B5D4F;
+    --rose:#B85C6B;
+    --teal:#4F7C74;
+    --gold:#C9A227;
+    --plum:#8B5E83;
+    --line:rgba(43,36,32,.18);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    overflow-x:hidden;
+    overflow-y:hidden;
+    height:100vh;
+  }
+  body.opened{ overflow-y:auto; height:auto; }
+  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:600; line-height:1.15; }
+  .handwrite{ font-family:'Caveat',cursive; }
+  img,svg{ display:block; }
+
+  /* ---------- COVER ---------- */
+  #cover{
+    position:fixed; inset:0; z-index:50;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(184,92,107,.10), transparent 60%),
+      var(--paper);
+    text-align:center; padding:32px;
+    transition:transform .9s cubic-bezier(.6,0,.3,1), opacity .8s ease;
+  }
+  #cover.closed{ transform:translateY(-100%); opacity:0; pointer-events:none; }
+  #cover .eyebrow{ color:var(--ink-soft); letter-spacing:.02em; margin-bottom:10px; font-size:15px; }
+  #cover h1{ font-size:clamp(32px,6vw,52px); font-style:italic; margin-bottom:14px; }
+  #cover p.sub{ color:var(--ink-soft); max-width:360px; margin-bottom:36px; font-size:15px; }
+  .flower-row{ display:flex; gap:22px; align-items:flex-end; }
+  .flower{
+    background:none; border:none; cursor:pointer; padding:0;
+    width:56px; transition:transform .3s ease;
+  }
+  .flower svg{ width:100%; height:auto; }
+  .flower:active{ transform:scale(.94); }
+  .flower.bloomed{ transform:scale(1.12) translateY(-4px); cursor:default; }
+  .flower-hint{ margin-top:16px; font-size:13px; color:var(--ink-soft); }
+
+  /* ---------- LAYOUT ---------- */
+  #site{ max-width:720px; margin:0 auto; padding:0 20px 80px; }
+  .banner{
+    margin:18px 0 0; padding:10px 14px; background:var(--card);
+    border:1px solid var(--line); border-radius:6px;
+    font-size:12.5px; color:var(--ink-soft);
+  }
+  section{ padding:64px 0; border-bottom:1px solid var(--line); }
+  section:last-of-type{ border-bottom:none; }
+  section .kicker{ color:var(--rose); font-size:13px; margin-bottom:8px; }
+  section h2{ font-size:clamp(24px,4vw,32px); margin-bottom:28px; }
+
+  .hero{ text-align:center; padding-top:56px; }
+  .hero h1{ font-size:clamp(30px,6vw,44px); font-style:italic; }
+  .hero p{ color:var(--ink-soft); margin-top:10px; }
+
+  /* ---------- TIMELINE ---------- */
+  .timeline{ position:relative; padding-left:22px; }
+  .timeline::before{
+    content:''; position:absolute; left:5px; top:6px; bottom:6px; width:2px;
+    background:var(--teal); opacity:.4;
+  }
+  .tl-item{ position:relative; padding-bottom:30px; cursor:pointer; }
+  .tl-item:last-child{ padding-bottom:0; }
+  .tl-item::before{
+    content:''; position:absolute; left:-22px; top:4px; width:12px; height:12px;
+    border-radius:50%; background:var(--teal); border:3px solid var(--paper);
+  }
+  .tl-date{ font-size:13px; color:var(--rose); margin-bottom:4px; }
+  .tl-title{ font-size:18px; margin-bottom:6px; }
+  .tl-desc{ max-height:0; overflow:hidden; color:var(--ink-soft); font-size:14.5px; line-height:1.5; transition:max-height .35s ease; }
+  .tl-item.open .tl-desc{ max-height:200px; margin-top:4px; }
+  .tl-hint{ font-size:12px; color:var(--ink-soft); opacity:.6; }
+
+  /* ---------- GALLERY ---------- */
+  .gallery{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .polaroid{
+    background:var(--card); padding:8px 8px 22px; border:1px solid var(--line);
+    box-shadow:0 6px 14px rgba(43,36,32,.12); cursor:pointer;
+    transition:transform .2s ease;
+  }
+  .polaroid:hover{ transform:translateY(-4px) rotate(0deg) !important; }
+  .polaroid:nth-child(odd){ transform:rotate(-2deg); }
+  .polaroid:nth-child(even){ transform:rotate(2deg); }
+  .gallery-video{
+    width:100%; aspect-ratio:4/5; object-fit:cover; background:#00000012; display:block;
+  }
+  .ph-caption{ font-family:'Caveat',cursive; font-size:16px; text-align:center; margin-top:8px; color:var(--ink-soft); }
+
+  #lightbox{
+    position:fixed; inset:0; background:rgba(43,36,32,.85); z-index:60;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  #lightbox.show{ display:flex; }
+  #lightbox .box{ background:var(--card); padding:14px 14px 26px; max-width:340px; width:100%; }
+  #lightbox .close{ margin-top:14px; background:none; border:none; color:var(--paper); font-size:14px; cursor:pointer; text-decoration:underline; }
+
+  /* ---------- SURAT ---------- */
+  .letter-btn{
+    background:var(--rose); color:var(--card); border:none; padding:12px 22px;
+    border-radius:4px; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .letter-body{ max-height:0; overflow:hidden; transition:max-height .5s ease; margin-top:22px; }
+  .letter-body.open{ max-height:600px; }
+  .letter-body .paper{
+    background:var(--card); border:1px solid var(--line); padding:24px;
+    font-family:'Caveat',cursive; font-size:21px; line-height:1.6; color:var(--ink);
+  }
+
+  /* ---------- MINIGAMES ---------- */
+  .game-tabs{ display:flex; gap:8px; margin-bottom:22px; }
+  .game-tab{
+    flex:1; padding:10px; border:1px solid var(--line); background:var(--card);
+    cursor:pointer; font-size:13.5px; color:var(--ink-soft); border-radius:4px;
+  }
+  .game-tab.active{ background:var(--ink); color:var(--card); border-color:var(--ink); }
+  .game-pane{ display:none; }
+  .game-pane.active{ display:block; }
+
+  .mm-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; max-width:340px; margin:0 auto; }
+  .mm-card{
+    aspect-ratio:1/1; border-radius:6px; cursor:pointer; position:relative;
+    perspective:600px;
+  }
+  .mm-inner{
+    width:100%; height:100%; position:relative; transform-style:preserve-3d;
+    transition:transform .4s ease;
+  }
+  .mm-card.flip .mm-inner{ transform:rotateY(180deg); }
+  .mm-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:6px;
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .mm-back{ background:var(--teal); color:var(--paper); font-size:16px; }
+  .mm-front{ background:var(--card); border:1px solid var(--line); transform:rotateY(180deg); }
+  .mm-front img{ width:100%; height:100%; object-fit:cover; border-radius:6px; }
+  .mm-card.matched .mm-front{ background:#DCE8E3; border-color:var(--teal); }
+  .mm-status{ text-align:center; margin-top:16px; font-size:13.5px; color:var(--ink-soft); }
+
+  .scratch-wrap{ max-width:340px; margin:0 auto; position:relative; }
+  .scratch-msg{
+    background:var(--card); border:1px solid var(--line); border-radius:6px;
+    padding:20px; font-family:'Caveat',cursive; font-size:20px; text-align:center;
+    line-height:1.5; min-height:120px; display:flex; align-items:center; justify-content:center;
+  }
+  #scratchCanvas{ position:absolute; inset:0; border-radius:6px; touch-action:none; cursor:pointer; }
+  .scratch-hint{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin-top:10px; }
+
+  /* ---------- EASTER EGG ---------- */
+  .egg{ position:fixed; bottom:16px; right:16px; z-index:40; opacity:.35; cursor:pointer; font-size:20px; background:none; border:none; }
+  #eggModal{
+    position:fixed; inset:0; background:rgba(43,36,32,.85); z-index:70;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  #eggModal.show{ display:flex; }
+  #eggModal .box{ background:var(--card); padding:26px; max-width:300px; text-align:center; font-family:'Caveat',cursive; font-size:22px; }
+  #eggModal button{ margin-top:16px; background:var(--rose); color:var(--card); border:none; padding:8px 18px; border-radius:4px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; }
+
+  @media (max-width:480px){
+    .gallery{ grid-template-columns:repeat(2,1fr); }
+    .mm-grid{ grid-template-columns:repeat(3,1fr); }
+  }
+</style>
+</head>
+<body>
+
+  <div id="cover">
+    <div class="eyebrow">happy birthday,</div>
+    <h1>raisa nashwa shakila sayangku cintaku</h1>
+    <p class="sub">there are some memories for you.</p>
+    <div class="flower-row" id="flowerRow">
+      <button class="flower" data-flower="1" aria-label="Bunga 1">
+        <svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="40" x2="30" y2="96" stroke="#4F7C74" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(0 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(45 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(90 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(135 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(180 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(225 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(270 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#B85C6B" transform="rotate(315 30 30)"/>
+          <circle cx="30" cy="30" r="9" fill="#3D2F22"/>
+        </svg>
+      </button>
+      <button class="flower" data-flower="2" aria-label="Bunga 2">
+        <svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="40" x2="30" y2="96" stroke="#4F7C74" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(0 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(45 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(90 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(135 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(180 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(225 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(270 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#C9A227" transform="rotate(315 30 30)"/>
+          <circle cx="30" cy="30" r="9" fill="#3D2F22"/>
+        </svg>
+      </button>
+      <button class="flower" data-flower="3" aria-label="Bunga 3">
+        <svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="40" x2="30" y2="96" stroke="#4F7C74" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(0 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(45 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(90 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(135 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(180 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(225 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(270 30 30)"/>
+          <ellipse cx="30" cy="14" rx="7" ry="16" fill="#8B5E83" transform="rotate(315 30 30)"/>
+          <circle cx="30" cy="30" r="9" fill="#3D2F22"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flower-hint" id="flowerHint">click each flower</div>
+  </div>
+
+  <div id="site">
+
+    <section class="hero">
+      <h1>us, through the time</h1>
+      <p>little memories from our journey</p>
+    </section>
+
+    <section id="timeline">
+      <div class="kicker">journey</div>
+      <h2>our moments</h2>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">february</div>
+          <div class="tl-title">the beginning</div>
+          <div class="tl-desc">kita pertama kali ketemu di kotask, dari ajakan fini u dateng kesitu. pertama kali i ketemu u, gapernah sedikitpun i nyangka kalo u yang akan nemenin i sepanjang i hidup. selalu manis dikenang saat kita masih pdkt, setiap hari main game, jalan, makan, sunrise, dan semuanya kita lakuin berdua</div>
+          <div class="tl-hint">click to read</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">june 7 2025</div>
+          <div class="tl-title">our commitment</div>
+          <div class="tl-desc">kita udah saling tau sebelumnya kalo kita saling suka, tapi kita belum pernah bilang untuk komitmen bareng. di tanggal ini, kita makan di lataroma, di tempat itu i beraniin diri buat ajak u ngejalanin hubungan dengan i bawa 6 tangkai bunga gerbera yang punya maksud bentuk komitmen diri i untuk kita</div>
+          <div class="tl-hint">click to read</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">march 25 2026</div>
+          <div class="tl-title">our parting</div>
+          <div class="tl-desc">i ngelakuin kesalahan terbesar selama kita bareng, i ngambil keputusan untuk kita pisah karna hubungan kita toxic dan di saat itu i gamau kalo cinta kita habis di tengah jalan. sampai sekarang i masih nyesel keputusan yang i ambil itu, dan sampai kapanpun i akan selalu inget akan kesalahan i itu untuk gaakan pernah i ulangin lagi</div>
+          <div class="tl-hint">click to read</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">today</div>
+          <div class="tl-title">our journey continues</div>
+          <div class="tl-desc">i berhasil pulang ke rumah kita, dan selamanya kita akan terus jalan bareng, dan selalu ada i di setiap ulang tahun u ke depannya, sampai kita dipisahkan oleh maut</div>
+          <div class="tl-hint">click to read</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <div class="kicker">gallery</div>
+      <h2>memories in motion</h2>
+      <div class="gallery" id="galleryGrid">
+        <!--GALLERY_VIDEOS-->
+      </div>
+    </section>
+
+    <section id="letter">
+      <div class="kicker">letter</div>
+      <h2>some words for you</h2>
+      <button class="letter-btn" id="letterBtn">read the letter</button>
+      <div class="letter-body" id="letterBody">
+        <div class="paper"> Hi, sayangku cintaku the love of my life<br><br>
+
+        happy birthday sayang,<br><br>
+
+        alhamdulillah ulang tahun u di tahun ini, i bisa ikut ngerayain sebagai pasangan u. i seneng banget karena di umur u yang ke 21 ini, i bisa ada di samping u dan ikut ngerasain salah satu momen penting dalam hidup u. mungkin sederhana, cuma bisa ngucapin dan nemenin u di hari ulang tahun u, tapi buat i itu berarti karena sekarang i punya tempat di hidup u.<br><br>
+
+        kalau dipikir-pikir, ternyata waktu berjalan cepet banget. rasanya baru kemarin kita mulai kenal lebih jauh, mulai sering cerita, mulai saling ngerti satu sama lain, sampai akhirnya sekarang i bisa manggil u sayang dan ngerayain ulang tahun u sebagai pasangan u. selama kita bareng, pasti ada banyak hal yang udah kita lewatin. ada senengnya, ada berantemnya, ada salah pahamnya, ada ketawanya, dan ada juga momen-momen kecil yang mungkin keliatannya biasa aja tapi sebenarnya bakal jadi bagian dari cerita kita.<br><br>
+
+        i sadar selama sama u, i juga masih banyak kurangnya. ada saat dimana i mungkin kurang peka, kurang ngerti apa yang u rasain, atau melakukan sesuatu yang bikin u kecewa. i juga ga selalu bisa memberikan apa yang u butuhin sebagai pasangan. tapi dari hubungan ini i belajar banyak hal tentang bagaimana memahami orang lain, bagaimana berkomunikasi, bagaimana menghadapi perbedaan, dan bagaimana untuk tetap memilih seseorang meskipun hubungan ga selalu berjalan sesuai yang kita mau.<br><br>
+
+        makasih karena selama ini u udah mau berbagi banyak hal sama i. makasih buat cerita-cerita u, perhatian u, waktu yang u kasih, hal-hal kecil yang u lakuin, dan semua momen yang kita lewatin bareng. mungkin ga semuanya selalu i tunjukin atau i bilang secara langsung, tapi i inget banyak hal tentang u dan tentang kita.<br><br>
+
+        di umur u yang ke 21 ini, mungkin bakal ada banyak hal baru yang u temuin. tanggung jawab yang makin besar, keputusan yang makin banyak, dan mungkin ada beberapa hal yang nantinya memaksa u buat tumbuh lebih cepat. i cuma pengen u tetap punya ruang buat menikmati hidup u sendiri. jangan sampai karena terlalu sibuk mengejar sesuatu, u lupa menikmati hal-hal kecil yang sebenarnya udah ada di depan u.<br><br>
+
+        i juga pengen hubungan kita bisa terus berkembang seiring kita sama-sama bertambah dewasa. bukan cuma sekadar makin lama bersama, tapi juga makin ngerti satu sama lain. i pengen kita bisa belajar dari kesalahan yang pernah kita buat, ngomongin hal-hal yang ga enak tanpa harus saling menjauh, dan tetap bisa jadi tempat pulang satu sama lain ketika keadaan lagi berat.<br><br>
+
+        i ga tau nanti hidup bakal bawa kita ke mana. yang i tau, untuk sekarang i bersyukur bisa menjalani bagian hidup ini sama u. bisa punya seseorang yang bisa i ceritain banyak hal, seseorang yang bisa bikin hari-hari biasa jadi terasa berbeda, dan seseorang yang sekarang ulang tahunnya pengen banget i rayain.<br><br>
+
+        semoga di umur 21 ini u bisa lebih kenal sama diri u sendiri, tau apa yang u mau, dan berani mengambil keputusan untuk hidup u. ga harus selalu punya semuanya sekarang. u masih punya banyak waktu buat tumbuh, berubah, mencoba, gagal, dan menemukan hal-hal yang memang cocok buat u.<br><br>
+
+        dan untuk kita, i cuma berharap kita ga berhenti belajar satu sama lain. i mungkin ga bisa janji semuanya bakal selalu mudah, tapi i bisa bilang kalau i akan terus berusaha menjadi pasangan yang lebih baik dari sebelumnya. karena i ga mau hubungan ini cuma berjalan karena kita sudah terlanjur bersama. i mau kita tetap bersama karena setiap harinya kita masih memilih satu sama lain.<br><br>
+
+        sekali lagi, happy birthday sayang. selamat ulang tahun yang ke 21. nikmatin hari u, karena hari ini memang tentang u.<br><br>
+
+        makasih udah lahir ke dunia, makasih udah jadi bagian dari hidup i, dan makasih karena di umur u yang ke 21 ini, i bisa ada di sini sebagai pasangan u.<br><br>
+
+        i love u, sayang.
+
+        </div>
+
+      </div>
+    </section>
+
+    <section id="games">
+      <div class="kicker">bonuses</div>
+      <h2>minigames</h2>
+      <div class="game-tabs">
+        <button class="game-tab active" data-tab="mm">memory match</button>
+        <button class="game-tab" data-tab="sc">scratch card</button>
+      </div>
+
+      <div class="game-pane active" id="pane-mm">
+        <div class="mm-grid" id="mmGrid"></div>
+        <div class="mm-status" id="mmStatus">match the cards</div>
+      </div>
+
+      <div class="game-pane" id="pane-sc">
+        <div class="scratch-wrap">
+          <div class="scratch-msg">through the ups n downs, through thick n thin, i'll always love you no matter what happens</div>
+          <canvas id="scratchCanvas" width="340" height="140"></canvas>
+        </div>
+        <div class="scratch-hint">scratch the card</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="lightbox">
+    <div class="box">
+      <video class="gallery-video" id="lbVideo" muted loop playsinline autoplay></video>
+      <div class="ph-caption" id="lbCap"></div>
+      <button class="close" id="lbClose">close</button>
+    </div>
+  </div>
+
+  <button class="egg" id="eggBtn">♥</button>
+  <div id="eggModal">
+    <div class="box">
+      iloveyouuuuuuuuuuuuuuuuuuuuuu cayangku cintaku my calon istri<br>
+      <br>
+      <button id="eggClose">close</button>
+    </div>
+  </div>
+
+<script>
+  // cover open — ketuk ketiga bunga
+  let bloomed = 0;
+  const totalFlowers = 3;
+  function openCover(){
+    document.getElementById('cover').classList.add('closed');
+    document.body.classList.add('opened');
+  }
+  document.querySelectorAll('.flower').forEach(f=>{
+    f.addEventListener('click', ()=>{
+      if(f.classList.contains('bloomed')) return;
+      f.classList.add('bloomed');
+      bloomed++;
+      const hint = document.getElementById('flowerHint');
+      if(bloomed < totalFlowers){
+        hint.textContent = (totalFlowers-bloomed)+' lagi';
+      } else {
+        hint.textContent = 'opening...';
+        setTimeout(openCover, 500);
+      }
+    });
+  });
+
+  // timeline expand
+  document.querySelectorAll('.tl-item').forEach(item=>{
+    item.addEventListener('click', ()=> item.classList.toggle('open'));
+  });
+
+  // gallery lightbox
+  const lb = document.getElementById('lightbox');
+  const lbVideo = document.getElementById('lbVideo');
+  const lbCap = document.getElementById('lbCap');
+  document.querySelectorAll('.polaroid').forEach(p=>{
+    p.addEventListener('click', ()=>{
+      lbVideo.src = p.querySelector('video').currentSrc;
+      lbVideo.play().catch(()=>{});
+      lbCap.textContent = p.dataset.cap;
+      lb.classList.add('show');
+    });
+  });
+  document.getElementById('lbClose').addEventListener('click', ()=>{
+    lb.classList.remove('show'); lbVideo.pause();
+  });
+  lb.addEventListener('click', e=>{ if(e.target===lb){ lb.classList.remove('show'); lbVideo.pause(); } });
+
+  // video galeri autoplay bareng waktu masuk viewport, gak perlu klik
+  const galleryVideos = document.querySelectorAll('#galleryGrid video');
+  const vidObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){ entry.target.play().catch(()=>{}); }
+      else{ entry.target.pause(); }
+    });
+  }, {threshold:0.35});
+  galleryVideos.forEach(v=>vidObserver.observe(v));
+
+  // letter reveal
+  document.getElementById('letterBtn').addEventListener('click', function(){
+    document.getElementById('letterBody').classList.toggle('open');
+  });
+
+  // game tabs
+  document.querySelectorAll('.game-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.game-pane').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('pane-'+tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // memory match
+  const icons = __MEMORY_ICONS__;
+  let deck = [...icons, ...icons].sort(()=>Math.random()-0.5);
+  const mmGrid = document.getElementById('mmGrid');
+  const mmStatus = document.getElementById('mmStatus');
+  let first=null, second=null, lock=false, matches=0;
+
+  deck.forEach((sym,i)=>{
+    const card = document.createElement('div');
+    card.className='mm-card'; card.dataset.sym=sym; card.dataset.idx=i;
+    card.innerHTML = `<div class="mm-inner">
+        <div class="mm-face mm-back">?</div>
+        <div class="mm-face mm-front">${sym}</div>
+      </div>`;
+    card.addEventListener('click', ()=>{
+      if(lock || card.classList.contains('flip') || card.classList.contains('matched')) return;
+      card.classList.add('flip');
+      if(!first){ first=card; return; }
+      second=card; lock=true;
+      if(first.dataset.sym===second.dataset.sym){
+        first.classList.add('matched'); second.classList.add('matched');
+        matches++;
+        first=null; second=null; lock=false;
+        if(matches===icons.length) mmStatus.textContent='yeaayy, you matched all cards!';
+      } else {
+        setTimeout(()=>{
+          first.classList.remove('flip'); second.classList.remove('flip');
+          first=null; second=null; lock=false;
+        },700);
+      }
+    });
+    mmGrid.appendChild(card);
+  });
+
+  // scratch card
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,340,140);
+  grad.addColorStop(0,'#C9A227'); grad.addColorStop(1,'#B85C6B');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,340,140);
+  ctx.fillStyle = 'rgba(43,36,32,.5)';
+  ctx.font = '13px Inter'; ctx.textAlign='center';
+  ctx.fillText('scratch here', 170, 74);
+
+  let scratching=false;
+  function pos(e){
+    const r = canvas.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return { x: p.clientX-r.left, y: p.clientY-r.top };
+  }
+  function scratch(e){
+    const {x,y} = pos(e);
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath(); ctx.arc(x,y,18,0,Math.PI*2); ctx.fill();
+  }
+  function checkDone(){
+    const data = ctx.getImageData(0,0,340,140).data;
+    let cleared=0;
+    for(let i=3;i<data.length;i+=4*20){ if(data[i]===0) cleared++; }
+    if(cleared/(data.length/(4*20)) > 0.55){
+      canvas.style.transition='opacity .4s ease';
+      canvas.style.opacity=0;
+      setTimeout(()=>canvas.style.display='none',400);
+    }
+  }
+  canvas.addEventListener('mousedown', e=>{scratching=true; scratch(e);});
+  canvas.addEventListener('mousemove', e=>{ if(scratching){ scratch(e); checkDone(); } });
+  window.addEventListener('mouseup', ()=>scratching=false);
+  canvas.addEventListener('touchstart', e=>{scratching=true; scratch(e);});
+  canvas.addEventListener('touchmove', e=>{ scratch(e); checkDone(); e.preventDefault(); }, {passive:false});
+  canvas.addEventListener('touchend', ()=>scratching=false);
+
+  // easter egg
+  document.getElementById('eggBtn').addEventListener('click', ()=> document.getElementById('eggModal').classList.add('show'));
+  document.getElementById('eggClose').addEventListener('click', ()=> document.getElementById('eggModal').classList.remove('show'));
+</script>
+</body>
+</html>
