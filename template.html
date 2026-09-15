@@ -119,12 +119,12 @@
     border-radius:4px; font-size:14px; cursor:pointer; font-family:'Inter',sans-serif;
   }
   .letter-body{ max-height:0; overflow:hidden; transition:max-height .5s ease; margin-top:22px; }
-  .letter-body.open{ max-height:600px; }
+  .letter-body.open{ max-height:2000px; }
   .letter-body .paper{
     background:var(--card); border:1px solid var(--line); padding:24px;
     font-family:'Caveat',cursive; font-size:21px; line-height:1.6; color:var(--ink);
+    max-height:50vh; overflow-y:auto;
   }
-
   /* ---------- MINIGAMES ---------- */
   .game-tabs{ display:flex; gap:8px; margin-bottom:22px; }
   .game-tab{
